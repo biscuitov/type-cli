@@ -15,9 +15,11 @@ type keymap struct {
 	quit      key.Binding
 	nextWord  key.Binding
 	backSpace key.Binding
+	restart   key.Binding
 }
 
 type model struct {
+	duration time.Duration
 	timer    timer.Model
 	cursor   cursor.Model
 	keymap   keymap
@@ -26,14 +28,15 @@ type model struct {
 	width  int
 	height int
 
-	exerciseService exercise.Service
+	ExerciseService exercise.Service
 	statsCalc       stats.Calculator
 }
 
-func NewModel(words []string) model {
+func NewModel(words []string, wordCount int, duration time.Duration) model {
 	m := model{
-		timer:  timer.NewWithInterval(10*time.Second, time.Second),
-		cursor: cursor.New(),
+		duration: duration,
+		timer:    timer.NewWithInterval(duration, time.Second),
+		cursor:   cursor.New(),
 
 		keymap: keymap{
 			quit: key.NewBinding(
@@ -43,12 +46,13 @@ func NewModel(words []string) model {
 			nextWord: key.NewBinding(
 				key.WithKeys(" "),
 			),
+			restart: key.NewBinding(key.WithKeys("enter")),
 			backSpace: key.NewBinding(
 				key.WithKeys("backspace"),
 			),
 		},
 
-		exerciseService: exercise.NewService(words),
+		ExerciseService: exercise.NewService(words, wordCount),
 		statsCalc:       stats.NewCalculator(),
 	}
 
